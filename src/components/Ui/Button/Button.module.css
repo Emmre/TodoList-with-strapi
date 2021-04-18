@@ -1,0 +1,36 @@
+.button {
+  padding: 10px 15px;
+  border-radius: 4px;
+  border: none;
+  transition: 150ms;
+  margin: 4px;
+  cursor: pointer;
+}
+
+.primary {
+  background-color: slateblue;
+  color: snow;
+}
+
+.primary:hover {
+  background-color: slategray;
+}
+.danger {
+  background-color: tomato;
+  color: snow;
+}
+.danger:hover {
+  background-color: seashell;
+  color: tomato;
+}
+.success {
+  background-color: seagreen;
+  color: snow;
+}
+.success:hover {
+  background-color: springgreen;
+}
+
+.button:disabled {
+  cursor: no-drop;
+}
