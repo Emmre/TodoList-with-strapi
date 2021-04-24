@@ -1,22 +1,20 @@
-import React from "react";
-import s from "./Input.module.css";
+import s from './Input.module.css';
 
-const Input = ({ label, name, placeholder, type, onChangeHandler, value }) => {
-  return (
+
+const Input = ({label, name, placeholder, type, onChangeHandler, value, block = false}) => (
     <div className={s.formGroup}>
-      <input
-        onChange={onChangeHandler}
-        type={type}
-        placeholder={placeholder}
-        name={name}
-        value={value}
-        className={s.input}
-        />
+        <input 
+            onChange={onChangeHandler} 
+            value={value}
+            type={type}
+            name={name}
+            placeholder={placeholder}
+            className={`${s.input} ${block ? s.block : ''}`} />
         {
-          label && <label className={s.label}>{label}</label>
+            label && 
+            <label className={s.label}>{label}</label>
         }
     </div>
-  );
-};
+)
 
 export default Input;

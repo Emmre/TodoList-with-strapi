@@ -16,16 +16,14 @@
     color: snow;
     transition: 150ms;
 }
-
 .brandLogo:hover,
 .toolbarLink:hover {
-    background-color: slategray;
-}
-
-.toolbarItem {
-    display: flex;
+    background-color: slategray; 
 }
 .toolbarList {
     display: flex;
     list-style-type: none;
+}
+.toolbarItem {
+    display: flex;
 }

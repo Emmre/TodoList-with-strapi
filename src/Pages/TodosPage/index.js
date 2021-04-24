@@ -1,135 +1,165 @@
-import React, { Component } from "react";
-import Card from "../../components/Ui/Card";
-import Button from "../../components/Ui/Button";
-import Input from "../../components/Ui/Input";
-import s from "./TodosPage.module.css";
+import React, {useState} from 'react';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import Card from '../../components/ui/Card';
+import s from './TodosPage.module.css';
 
-class TodosPage extends Component {
-  state = {
-    todos: [],
-    todoTitle: "",
-  };
 
-  componentDidMount() {
-    this.fetchTodos();
-  }
+class TodosPage extends React.Component {
+    state = {
+        todos: [],
+        todoTitle: '',
+        isSubmitting: false,
+    }
 
-  // Get Data
-  fetchTodos = async () => {
-    const response = await fetch("http://localhost:1337/todos");
-    const data = await response.json();
-    this.setState({ todos: data });
-  };
+    componentDidMount() {
+        this.fetchTodos();
+    }
 
-  // Send Data
-  postTodo = async (newTodo) => {
-    const response = await fetch("http://localhost:1337/todos", {
-      body: JSON.stringify(newTodo),
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    setTodoTitle = (event) => {
+        this.setState({todoTitle: event.target.value});
+    }
 
-    const data = await response.json();
-    return data;
-  };
+    fetchTodos = async () => {
+        const response = await fetch('http://localhost:1337/todos');
+        const data = await response.json();
 
-  // Delete Todo
-  deleteTodo = async (todoId) => {
-    await fetch(`http://localhost:1337/todos/${todoId}`, {
-      method: "DELETE",
-    });
+        this.setState({todos: data});
+    }
 
-    await this.fetchTodos();
-  };
+    postTodo = async (newTodo) => {
+        const response = await fetch('http://localhost:1337/todos', {
+            body: JSON.stringify(newTodo),
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
 
-  // Change Completed
-  toggleCompleted = async (todo) => {
-    await fetch(`http://localhost:1337/todos/${todo.id}`, {
-      method: "PUT",
-      body: JSON.stringify({
-        ...todo,
-        completed: !todo.completed,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+        return data;
+    }
 
-    await this.fetchTodos();
-  };
+    addTodo = async (event) => {
+        event.preventDefault();
 
-  // Add New Todo
-  addTodo = async (e) => {
-    e.preventDefault();
+        this.setState({isSubmitting: true});
 
-    const newTodo = {
-      title: this.state.todoTitle,
-    };
+        const newTodo = { title: this.state.todoTitle };
 
-    await this.postTodo(newTodo);
-    await this.fetchTodos();
+        await this.postTodo(newTodo);
 
-    this.setState({
-      todoTitle: "",
-    });
-  };
+        await this.fetchTodos();
 
-  // Set Todo Title
-  setTodoTitle = (e) => {
-    this.setState({ todoTitle: e.target.value });
-  };
+        this.setState({
+            todoTitle: '',
+            isSubmitting: false
+        });
+    }
 
-  render() {
-    const { todos, todoTitle } = this.state;
-    return (
-      <div>
-        <h1>TodosPage</h1>
-        <hr />
-        <div className={s.todoFromWrapper}>
-          <Card>
-            <h1>Add Todo</h1>
-            <form onSubmit={this.addTodo}>
-              <Input
-                label="Todo Title"
-                placeholder="Enter a todo title..."
-                value={todoTitle}
-                onChangeHandler={this.setTodoTitle}
-              />
-              <Button type="submit">Add Todo</Button>
-            </form>
-          </Card>
-        </div>
-        <div className={s.todosGrid}>
-          {todos.map((todo) => (
-            <TodoCard
-              key={todo.id}
-              todo={todo}
-              onToggleDone={this.toggleCompleted}
-              onDelete={this.deleteTodo}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
+    toggleCompleted = async (todo) => {
+        // put requesti at
+        await fetch(`http://localhost:1337/todos/${todo.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                ...todo,
+                completed: !todo.completed
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        // guncel datayi cek
+        // statei guncelle
+        await this.fetchTodos();
+    }
+
+    deleteTodo = async (todoId) => {
+        // silme istegi at
+        await fetch(`http://localhost:1337/todos/${todoId}`, {
+            method: 'DELETE'
+        });
+
+        // guncel datayi cek
+        await this.fetchTodos()
+    }
+
+    render() {
+        const {todos, todoTitle, isSubmitting, isDeleting, isToggling} = this.state;
+
+        return (
+            <div>
+                <h1>Todos Page</h1>
+                <hr />
+
+                <div className={s.todoFormWrapper}>
+                    <Card>
+                        <h1>Todo Form</h1>
+                        <form onSubmit={this.addTodo}>
+                            <Input
+                                label="Todo Title"
+                                placeholder="Enter todo title..."
+                                value={todoTitle}
+                                onChangeHandler={this.setTodoTitle} />
+
+                            <Button 
+                                type="submit"
+                                isLoading={isSubmitting}>
+                                Add Todo
+                            </Button>
+                        </form>
+                    </Card>
+                </div>
+
+                <div className={s.todosGrid}>
+                    {
+                        todos.map(todo => <TodoCard 
+                                                key={todo.id} 
+                                                todo={todo} 
+                                                onToggleDone={this.toggleCompleted}
+                                                onDelete={this.deleteTodo} />)
+                    }
+                </div>
+            </div>
+        )
+    }
 }
 
-const TodoCard = ({ todo, onToggleDone, onDelete }) => (
-  <Card>
-    <h3>{todo.title}</h3>
-    <div className={s.todoAction}>
-      <Button
-        variant={todo.completed ? "success" : "primary"}
-        onClickHandler={() => onToggleDone(todo)}
-      >
-        {todo.completed ? "Done" : "Not Done"}
-      </Button>
-      <Button variant="danger" onClickHandler={() => onDelete(todo.id)}>
-        Delete
-      </Button>
-    </div>
-  </Card>
-);
+const TodoCard = ({todo, onToggleDone, onDelete}) => {
+    const [isToggling, setToggling] = useState(false);
+    const [isDeleting, setDeleting] = useState(false);
+
+    return (
+        <Card>
+            <h3>{todo.title}</h3>
+            <div className={s.todoActions}>
+                <Button 
+                    variant={todo.completed ? 'success' : 'primary'}
+                    onClickHandler={async () => {
+                        setToggling(true);
+
+                        await onToggleDone(todo);
+
+                        setToggling(false);
+                    }}
+                    isLoading={isToggling}>
+                    {todo.completed ? 'Done' : 'Not Done'}
+                </Button>
+                <Button 
+                    variant="danger"
+                    onClickHandler={async () => {
+                        setDeleting(true);
+
+                        await onDelete(todo.id);
+
+                        setDeleting(false);
+                    }}
+                    isLoading={isDeleting}>
+                    Delete
+                </Button>
+            </div>
+        </Card>
+    )
+}
+
 export default TodosPage;
